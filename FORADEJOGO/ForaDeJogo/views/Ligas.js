@@ -24,7 +24,10 @@ export default function LigaView({ navigation }) {
     const renderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.itemContainer}
-            onPress={() => navigation.navigate('DetalhesLiga', { leagueCode: item.code })}
+            onPress={() => navigation.navigate('DetalhesLiga', {
+              leagueCode: item.code,
+              leagueName: item.name,
+            })}
         >
             {item.logo && <Image source={{ uri: item.logo }} style={styles.logo} />}
             <Text style={styles.name}>{item.name}</Text>
