@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import BottomTabNavigator from './BottomTabNavigator';
 import DetalhesLiga from '../views/DetalhesLiga';
+import Equipa from '../views/Equipa'
 
 const Stack = createNativeStackNavigator();
 
@@ -12,17 +13,21 @@ export default function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator>
 
-        {/* Tabs */}
         <Stack.Screen
           name="Tabs"
           component={BottomTabNavigator}
           options={{ headerShown: false }}
         />
 
-        {/* Detalhes */}
         <Stack.Screen
           name="DetalhesLiga"
           component={DetalhesLiga}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="Equipa"
+          component={Equipa}
           options={{ headerShown: false }}
         />
 

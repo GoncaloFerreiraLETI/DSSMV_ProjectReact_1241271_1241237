@@ -1,8 +1,15 @@
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 function TableRow({ item, position }) {
+  const navigation = useNavigation();
+
+  const handlePress = () => {
+    navigation.navigate('Equipa', { teamId: item.teamId });
+  };
+
   return (
-    <View style={styles.row}>
+    <TouchableOpacity style={styles.row} onPress={handlePress}>
       <Text style={styles.pos}>{position}</Text>
 
       <View style={styles.club}>
@@ -15,7 +22,7 @@ function TableRow({ item, position }) {
       <Text style={styles.stat}>{item.games}</Text>
       <Text style={styles.stat}>{item.goalDiff}</Text>
       <Text style={styles.stat}>{item.points}</Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -26,27 +33,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10
   },
-  pos: {
-    width: 25,
-    textAlign: 'center'
-  },
-  club: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  logo: {
-    width: 24,
-    height: 24,
-    marginRight: 8
-  },
-  clubName: {
-    flexShrink: 1
-  },
-  stat: {
-    width: 40,
-    textAlign: 'center'
-  }
+  pos: { width: 25, textAlign: 'center' },
+  club: { flex: 1, flexDirection: 'row', alignItems: 'center' },
+  logo: { width: 24, height: 24, marginRight: 8 },
+  clubName: { flexShrink: 1 },
+  stat: { width: 40, textAlign: 'center' }
 });
 
 export default TableRow;
