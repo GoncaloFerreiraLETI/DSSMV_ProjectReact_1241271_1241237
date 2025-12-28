@@ -1,18 +1,34 @@
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import dayjs from 'dayjs';
 
 export default function JogoRow({ game }) {
+  const navigation = useNavigation();
+
+   if (!game || !game.competitions || game.competitions.length === 0) return null;
+
   const competition = game.competitions[0];
   const [home, away] = competition.competitors;
 
+  console.log('JogoRow game:', game);
+
   return (
-    <View style={styles.row}>
+    <TouchableOpacity
+      style={styles.row}
+      onPress={() =>
+        navigation.navigate('DetalhesJogo', {
+          game, // passa o objeto inteiro
+        })
+      }
+    >
+
+
       <View style={styles.left}>
         <Text
           style={styles.team}
           numberOfLines={1}
           adjustsFontSizeToFit
-          minimumFontScale={0.6} // reduz até 60% do tamanho original
+          minimumFontScale={0.6}
         >
           {home.team.displayName}
         </Text>
@@ -34,7 +50,7 @@ export default function JogoRow({ game }) {
           {away.team.displayName}
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
