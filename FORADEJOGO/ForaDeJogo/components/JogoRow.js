@@ -17,7 +17,7 @@ export default function JogoRow({ game }) {
       style={styles.row}
       onPress={() =>
         navigation.navigate('DetalhesJogo', {
-          game, // passa o objeto inteiro
+          game,
         })
       }
     >

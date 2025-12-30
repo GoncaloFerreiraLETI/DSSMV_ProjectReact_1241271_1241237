@@ -4,9 +4,8 @@ import dayjs from 'dayjs';
 
 export default function DetalhesJogo({ route }) {
   const { game, leagueName } = route.params;
-  const competitors = game.competitors || [];
-  const [home, away] = competitors.length === 2 ? competitors : [{}, {}];
-
+  const competitors = game.competitions?.[0]?.competitors || [];
+  const [home, away] = competitors.length === 2 ? competitors : [{ team: {} }, { team: {} }];
 
   return (
     <View style={styles.container}>
@@ -17,22 +16,22 @@ export default function DetalhesJogo({ route }) {
 
       <View style={styles.teams}>
         <View style={styles.team}>
-          <Image source={{ uri: home.logo ?? '' }} style={styles.logo} />
-          <Text style={styles.teamName}>{home.displayName}</Text>
+          <Image source={{ uri: home.team.logo ?? '' }} style={styles.logo} />
+          <Text style={styles.teamName}>{home.team.displayName}</Text>
           <Text style={styles.score}>{home.score || '-'}</Text>
         </View>
 
         <Text style={styles.vs}>VS</Text>
 
         <View style={styles.team}>
-          <Image source={{ uri: away.logo ?? '' }} style={styles.logo} />
-          <Text style={styles.teamName}>{away.displayName}</Text>
+          <Image source={{ uri: away.team.logo ?? '' }} style={styles.logo} />
+          <Text style={styles.teamName}>{away.team.displayName}</Text>
           <Text style={styles.score}>{away.score || '-'}</Text>
         </View>
       </View>
 
       <Text style={styles.status}>
-        {game.fullStatus?.type?.description || 'Scheduled'}
+        {game.competitions?.[0]?.status?.[0]?.type?.description || 'Scheduled'}
       </Text>
     </View>
   );

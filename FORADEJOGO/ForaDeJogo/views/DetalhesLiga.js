@@ -1,16 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Dimensions } from 'react-native';
+import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import DetalhesLigaStore from '../stores/DetalhesLigaStore';
 import DetalhesLigaActions from '../actions/DetalhesLigaActions';
 import TableRow from '../components/TableRow';
+import MarcadorRow from '../components/MarcadorRow';
 
 export default function DetalhesLiga({ route }) {
   const { leagueCode, leagueName } = route.params;
+  const [index, setIndex] = useState(0);
+  const [routes] = useState([
+    { key: 'geral', title: 'Geral' },
+    { key: 'casa', title: 'Casa' },
+    { key: 'fora', title: 'Fora' },
+    { key: 'marcadores', title: 'Marcadores' },
+  ]);
+
   const [table, setTable] = useState([]);
+  const [homeTable, setHomeTable] = useState([]);
+  const [awayTable, setAwayTable] = useState([]);
+  const [topScorers, setTopScorers] = useState([]);
 
   useEffect(() => {
     const onChange = () => {
       setTable(DetalhesLigaStore.getTable());
+      setHomeTable(DetalhesLigaStore.getHomeTable());
+      setAwayTable(DetalhesLigaStore.getAwayTable());
+      setTopScorers(DetalhesLigaStore.getTopScorers());
     };
 
     DetalhesLigaStore.addChangeListener(onChange);
@@ -19,10 +35,8 @@ export default function DetalhesLiga({ route }) {
     return () => DetalhesLigaStore.removeChangeListener(onChange);
   }, [leagueCode]);
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{leagueName}</Text>
-
+  const renderTable = (data) => (
+    <>
       <View style={styles.headerRow}>
         <Text style={styles.pos}>#</Text>
         <Text style={styles.club}>Nome</Text>
@@ -30,14 +44,58 @@ export default function DetalhesLiga({ route }) {
         <Text style={styles.stat}>DG</Text>
         <Text style={styles.stat}>PTS</Text>
       </View>
-
       <FlatList
-        data={table}
+        data={data}
         keyExtractor={(item) => item.teamId.toString()}
-        renderItem={({ item, index }) => (
-          <TableRow item={item} position={index + 1} />
-        )}
+        renderItem={({ item, index }) => <TableRow item={item} position={index + 1} />}
         contentContainerStyle={{ paddingBottom: 120 }}
+      />
+    </>
+  );
+
+  const renderMarcadores = () => (
+    <FlatList
+      data={topScorers}
+      keyExtractor={(item) => item.playerId.toString()}
+      renderItem={({ item, index }) => <MarcadorRow player={item} position={index + 1} />}
+      contentContainerStyle={{ paddingBottom: 120 }}
+    />
+  );
+
+  const renderScene = ({ route }) => {
+    switch (route.key) {
+      case 'geral':
+        return renderTable(table);
+      case 'casa':
+        return renderTable(homeTable);
+      case 'fora':
+        return renderTable(awayTable);
+      case 'marcadores':
+        return renderMarcadores();
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>{leagueName}</Text>
+
+      <TabView
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={{ width: Dimensions.get('window').width }}
+        renderTabBar={props => (
+          <TabBar
+            {...props}
+            indicatorStyle={{ backgroundColor: 'blue' }}
+            style={{ backgroundColor: '#f2f2f2' }}
+            activeColor="black"
+            inactiveColor="black"
+            labelStyle={{ fontWeight: 'bold' }}
+          />
+        )}
       />
     </View>
   );
@@ -90,5 +148,3 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   }
 });
-
-
