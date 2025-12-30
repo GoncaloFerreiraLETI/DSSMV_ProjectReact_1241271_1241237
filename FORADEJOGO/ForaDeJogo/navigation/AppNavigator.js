@@ -4,10 +4,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import BottomTabNavigator from './BottomTabNavigator';
 import DetalhesLiga from '../views/DetalhesLiga';
-import Equipa from '../views/Equipa'
-import EditorPlantel from '../views/EditorPlantel'
-import DetalhesJogo from '../views/DetalhesJogo';
+import Equipa from '../views/Equipa';
+import EditorPlantel from '../views/EditorPlantel';
 import CriadorPlantel from '../views/CriadorPlantel';
+import DetalhesJogo from '../views/DetalhesJogo';
 
 const Stack = createNativeStackNavigator();
 

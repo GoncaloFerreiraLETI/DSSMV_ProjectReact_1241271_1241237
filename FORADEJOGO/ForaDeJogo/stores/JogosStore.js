@@ -23,6 +23,12 @@ const JogosStore = {
 
 AppDispatcher.register((action) => {
   switch (action.type) {
+
+    case 'JOGOS_LOADING':
+      leagues = [];
+      JogosStore.emitChange();
+      break;
+
     case 'JOGOS_LOADED':
       leagues = action.payload;
       JogosStore.emitChange();

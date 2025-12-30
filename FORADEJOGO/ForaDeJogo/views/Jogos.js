@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, SafeAreaView } from 'react-native';
+import { FlatList } from 'react-native';
 import dayjs from 'dayjs';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import DaySelector from '../components/DaySelector';
 import LigaAccordion from '../components/LigaAccordion';
@@ -36,11 +37,12 @@ export default function Jogos() {
 
       <FlatList
         data={leagues}
-        keyExtractor={(item, index) => item.leagueCode ?? index.toString()}
+        keyExtractor={(item) => item.league.code}
         renderItem={({ item }) => <LigaAccordion data={item} />}
-        contentContainerStyle={{
-          paddingBottom: 120,
-        }}
+        initialNumToRender={4}
+        windowSize={5}
+        removeClippedSubviews
+        contentContainerStyle={{ paddingBottom: 120 }}
       />
     </SafeAreaView>
   );

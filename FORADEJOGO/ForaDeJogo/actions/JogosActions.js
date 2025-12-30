@@ -21,26 +21,31 @@ const LEAGUES = [
 export default {
   async fetchGamesByDate(date) {
     try {
+      AppDispatcher.dispatch({
+        type: 'JOGOS_LOADING',
+      });
+
       const formattedDate = dayjs(date).format('YYYYMMDD');
-      const results = [];
 
-      for (const leagueCode of LEAGUES) {
+      const requests = LEAGUES.map(async (leagueCode) => {
         const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueCode}/scoreboard?dates=${formattedDate}`;
-
         const response = await fetch(url);
         const json = await response.json();
 
         if (json?.events?.length > 0) {
-          results.push({
+          return {
             league: {
               code: leagueCode,
               name: json.leagues?.[0]?.name ?? leagueCode,
               logo: json.leagues?.[0]?.logos?.[0]?.href ?? null,
             },
             games: json.events,
-          });
+          };
         }
-      }
+        return null;
+      });
+
+      const results = (await Promise.all(requests)).filter(Boolean);
 
       AppDispatcher.dispatch({
         type: 'JOGOS_LOADED',
@@ -49,5 +54,5 @@ export default {
     } catch (error) {
       console.error('Erro ao carregar jogos', error);
     }
-  },
+  }
 };

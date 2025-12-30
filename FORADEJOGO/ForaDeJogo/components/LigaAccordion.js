@@ -15,7 +15,6 @@ export default function LigaAccordion({ data }) {
         <Text style={styles.title}>{data.league.name}</Text>
         <Text style={styles.leading}>{open ? 'v' : '>'}</Text>
       </TouchableOpacity>
-      console.log('data.games', data.games);
       {open && data.games?.map((game) => (
         <JogoRow key={game.id} game={game} leagueCode={data.league.code} />
       ))}
