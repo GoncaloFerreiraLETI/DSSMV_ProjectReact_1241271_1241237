@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, } from 'react-native';
 import { getFavoriteTeams, removeFavorite } from '../actions/FavoritosActions';
+import AppBar from '../components/AppBar';
 
 export default function Favoritos({ navigation }) {
   const [teams, setTeams] = useState([]);
@@ -35,35 +36,38 @@ export default function Favoritos({ navigation }) {
   }
 
   return (
-    <FlatList
-      data={teams}
-      keyExtractor={(item) => item.id.toString()}
-      renderItem={({ item }) => (
-        <View style={styles.row}>
-          <TouchableOpacity
-            style={styles.info}
-            onPress={() =>
-              navigation.navigate('Equipa', { teamId: item.id })
-            }
-          >
-            <Image
-              source={{ uri: item.logos?.[0]?.href }}
-              style={styles.logo}
-            />
-            <Text style={styles.name}>{item.displayName}</Text>
-          </TouchableOpacity>
+    <View>
+      <AppBar title="Favoritos" />
+      <FlatList
+        data={teams}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.row}>
+            <TouchableOpacity
+              style={styles.info}
+              onPress={() =>
+                navigation.navigate('Equipa', { teamId: item.id })
+              }
+            >
+              <Image
+                source={{ uri: item.logos?.[0]?.href }}
+                style={styles.logo}
+              />
+              <Text style={styles.name}>{item.displayName}</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={async () => {
-              await removeFavorite(item.id);
-              loadFavorites();
-            }}
-          >
-            <Text style={styles.remove}>✕</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    />
+            <TouchableOpacity
+              onPress={async () => {
+                await removeFavorite(item.id);
+                loadFavorites();
+              }}
+            >
+              <Text style={styles.remove}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      />
+    </View>
   );
 }
 

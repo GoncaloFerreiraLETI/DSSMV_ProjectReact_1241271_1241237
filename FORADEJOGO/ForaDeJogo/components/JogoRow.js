@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 export default function JogoRow({ game }) {
   const navigation = useNavigation();
 
-   if (!game || !game.competitions || game.competitions.length === 0) return null;
+  if (!game || !game.competitions || game.competitions.length === 0) return null;
 
   const competition = game.competitions[0];
   const [home, away] = competition.competitors;

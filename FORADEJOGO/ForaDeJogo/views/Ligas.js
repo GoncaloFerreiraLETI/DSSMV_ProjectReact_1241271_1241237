@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import LigaStore from '../stores/LigaStore';
 import LigaActions from '../actions/LigaActions';
+import AppBar from '../components/AppBar';
 
 export default function LigaView({ navigation }) {
     const [leagues, setLeagues] = useState([]);
@@ -37,15 +38,17 @@ export default function LigaView({ navigation }) {
     if (loading) return <ActivityIndicator style={{ flex: 1 }} size="large" color="#0000ff" />;
 
     return (
+      <View>
+        <AppBar title="Ligas" />
         <FlatList
             data={leagues}
             keyExtractor={(item) => item.code}
             renderItem={renderItem}
             contentContainerStyle={{
-                paddingVertical: 100,
-                paddingBottom: 110,
+                paddingBottom: 250,
             }}
         />
+      </View>
     );
 }
 

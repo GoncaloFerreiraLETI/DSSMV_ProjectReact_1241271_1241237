@@ -6,6 +6,7 @@ import EquipaStore from '../stores/EquipaStore';
 
 import PlantelTab from '../components/PlantelTab';
 import ProxJogosTab from '../components/ProxJogosTab';
+import AppBar from '../components/AppBar';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -42,11 +43,13 @@ export default function Equipa({ route }) {
 
   return (
     <View style={{ flex: 1 }}>
+      <AppBar title="Equipa" />
+
       <View style={styles.container}>
         <Text style={styles.name}>Plantel da Equipa</Text>
       </View>
 
-      <Tab.Navigator>
+      <Tab.Navigator style={styles.tabContainer}>
         <Tab.Screen
           name="Plantel"
           children={() =>
@@ -61,6 +64,10 @@ export default function Equipa({ route }) {
           name="Jogos"
           children={() => <ProxJogosTab teamId={teamId} />}
         />
+        <Tab.Screen
+          name="Resultados"
+          children={() => <Text Resultados />}
+        />
       </Tab.Navigator>
 
     </View>
@@ -70,4 +77,5 @@ export default function Equipa({ route }) {
 const styles = StyleSheet.create({
   container: { alignItems: 'center', padding: 16 },
   name: { fontSize: 20, fontWeight: 'bold' },
+  tabContainer: { marginHorizontal: 20, borderRadius: 10}
 });

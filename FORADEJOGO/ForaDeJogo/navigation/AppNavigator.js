@@ -5,8 +5,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BottomTabNavigator from './BottomTabNavigator';
 import DetalhesLiga from '../views/DetalhesLiga';
 import Equipa from '../views/Equipa'
+import EditorPlantel from '../views/EditorPlantel'
 import DetalhesJogo from '../views/DetalhesJogo';
-
+import CriadorPlantel from '../views/CriadorPlantel';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,15 +29,27 @@ export default function AppNavigator() {
         />
 
         <Stack.Screen
+          name="DetalhesJogo"
+          component={DetalhesJogo}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
           name="Equipa"
           component={Equipa}
           options={{ headerShown: false }}
         />
 
         <Stack.Screen
-            name="DetalhesJogo"
-            component={DetalhesJogo}
-            options={{ headerShown: false }}
+          name="EditorPlantel"
+          component={EditorPlantel}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="CriadorPlantel"
+          component={CriadorPlantel}
+          options={{ headerShown: false }}
         />
 
       </Stack.Navigator>
