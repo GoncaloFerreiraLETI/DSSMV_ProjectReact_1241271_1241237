@@ -11,23 +11,19 @@ export default function DetalhesLiga({ route }) {
   const [index, setIndex] = useState(0);
   const [routes] = useState([
     { key: 'geral', title: 'Geral' },
-    { key: 'casa', title: 'Casa' },
-    { key: 'fora', title: 'Fora' },
     { key: 'marcadores', title: 'Marcadores' },
   ]);
 
+
   const [table, setTable] = useState([]);
-  const [homeTable, setHomeTable] = useState([]);
-  const [awayTable, setAwayTable] = useState([]);
   const [topScorers, setTopScorers] = useState([]);
 
   useEffect(() => {
     const onChange = () => {
       setTable(DetalhesLigaStore.getTable());
-      setHomeTable(DetalhesLigaStore.getHomeTable());
-      setAwayTable(DetalhesLigaStore.getAwayTable());
       setTopScorers(DetalhesLigaStore.getTopScorers());
     };
+
 
     DetalhesLigaStore.addChangeListener(onChange);
     DetalhesLigaActions.fetchTable(leagueCode);
@@ -66,10 +62,6 @@ export default function DetalhesLiga({ route }) {
     switch (route.key) {
       case 'geral':
         return renderTable(table);
-      case 'casa':
-        return renderTable(homeTable);
-      case 'fora':
-        return renderTable(awayTable);
       case 'marcadores':
         return renderMarcadores();
       default:

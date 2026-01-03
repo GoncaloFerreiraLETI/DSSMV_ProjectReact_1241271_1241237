@@ -2,11 +2,11 @@ import EventEmitter from 'eventemitter3';
 import AppDispatcher from '../dispatcher/AppDispatcher';
 
 const CHANGE_EVENT = 'change';
-let _game = null;
+let _events = [];
 
 const DetalhesJogoStore = new EventEmitter();
 
-DetalhesJogoStore.getGame = () => _game;
+DetalhesJogoStore.getEvents = () => _events;
 
 DetalhesJogoStore.emitChange = () => DetalhesJogoStore.emit(CHANGE_EVENT);
 DetalhesJogoStore.addChangeListener = (cb) => DetalhesJogoStore.on(CHANGE_EVENT, cb);
@@ -14,8 +14,8 @@ DetalhesJogoStore.removeChangeListener = (cb) => DetalhesJogoStore.off(CHANGE_EV
 
 AppDispatcher.register((action) => {
   switch(action.type) {
-    case 'RECEIVE_GAME_DETAILS':
-      _game = action.payload;
+    case 'RECEIVE_GAME_SUMMARY':
+      _events = action.payload;
       DetalhesJogoStore.emitChange();
       break;
     default:

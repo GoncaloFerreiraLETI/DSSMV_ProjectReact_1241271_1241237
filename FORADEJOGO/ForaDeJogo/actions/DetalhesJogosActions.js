@@ -1,30 +1,22 @@
 import AppDispatcher from '../dispatcher/AppDispatcher';
 
 const DetalhesJogosActions = {
-  fetchGameDetails: async (gameId, leagueCode) => {
-    console.log('FETCH GAME DETAILS', gameId, leagueCode);
-
+  fetchGameSummary: async (gameId, leagueCode) => {
     try {
       const res = await fetch(
-        `https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueCode}/events`
+        `https://cdn.espn.com/core/${leagueCode}/playbyplay?xhr=1&gameId=${gameId}`
       );
-
       const json = await res.json();
 
-      // Encontrar o evento com o id do jogo
-      const event = json.events?.find(e => e.id === gameId);
+      const events =
+        json?.page?.content?.[0]?.competitions?.[0]?.plays || [];
 
-      if (event) {
-        AppDispatcher.dispatch({
-          type: 'RECEIVE_GAME_DETAILS',
-          payload: event,
-        });
-      } else {
-        console.log('SEM EVENTS');
-      }
-
+      AppDispatcher.dispatch({
+        type: 'RECEIVE_GAME_SUMMARY',
+        payload: events,
+      });
     } catch (error) {
-      console.error('Erro ao buscar detalhes do jogo', error);
+      console.error('Erro ao buscar resumo do jogo', error);
     }
   },
 };
