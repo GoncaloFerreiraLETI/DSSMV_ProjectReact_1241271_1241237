@@ -74,7 +74,7 @@ export default function CriadorPlantel({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    paddingHorizontal: 16,
     backgroundColor: '#f2f2f2',
   },
   item: {

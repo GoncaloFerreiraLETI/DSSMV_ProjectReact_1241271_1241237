@@ -1,55 +1,57 @@
 import { supabase } from '../services/supabase';
 
-const USER_ID = '1';
+export async function addFavorite(userId, teamId) {
+  if (!userId) return;
 
-export async function addFavorite(teamId) {
   const { data: existing } = await supabase
     .from('favoritos')
     .select('id')
-    .eq('idUser', USER_ID)
+    .eq('idUser', userId)
     .eq('idClube', teamId)
     .single();
 
   if (existing) return;
 
   const { error } = await supabase.from('favoritos').insert({
-    idUser: USER_ID,
+    idUser: userId,
     idClube: teamId,
   });
 
-  if (error) {
-    console.error('Erro ao adicionar favorito:', error);
-  }
+  if (error) console.error('Erro ao adicionar favorito:', error);
 }
 
-export async function removeFavorite(teamId) {
+export async function removeFavorite(userId, teamId) {
+  if (!userId) return;
+
   const { error } = await supabase
     .from('favoritos')
     .delete()
-    .eq('idUser', USER_ID)
+    .eq('idUser', userId)
     .eq('idClube', teamId);
 
-  if (error) {
-    console.error('Erro ao remover favorito:', error);
-  }
+  if (error) console.error('Erro ao remover favorito:', error);
 }
 
-export async function isFavorite(teamId) {
+export async function isFavorite(userId, teamId) {
+  if (!userId) return false;
+
   const { data } = await supabase
     .from('favoritos')
     .select('id')
-    .eq('idUser', USER_ID)
+    .eq('idUser', userId)
     .eq('idClube', teamId)
     .maybeSingle();
 
   return !!data;
 }
 
-export async function getFavoriteTeams() {
+export async function getFavoriteTeams(userId) {
+  if (!userId) return [];
+
   const { data, error } = await supabase
     .from('favoritos')
     .select('idClube')
-    .eq('idUser', USER_ID);
+    .eq('idUser', userId);
 
   if (error || !data) return [];
 

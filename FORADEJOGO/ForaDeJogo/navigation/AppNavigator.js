@@ -8,6 +8,8 @@ import Equipa from '../views/Equipa';
 import EditorPlantel from '../views/EditorPlantel';
 import CriadorPlantel from '../views/CriadorPlantel';
 import DetalhesJogo from '../views/DetalhesJogo';
+import Login from '../views/Login';
+import Register from '../views/Register';
 
 const Stack = createNativeStackNavigator();
 
@@ -49,6 +51,18 @@ export default function AppNavigator() {
         <Stack.Screen
           name="CriadorPlantel"
           component={CriadorPlantel}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="Login"
+          component={Login}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="Register"
+          component={Register}
           options={{ headerShown: false }}
         />
 
