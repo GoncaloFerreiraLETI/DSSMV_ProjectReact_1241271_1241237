@@ -11,7 +11,6 @@ export default function DetalhesLiga({ route }) {
   const [index, setIndex] = useState(0);
   const [routes] = useState([
     { key: 'geral', title: 'Geral' },
-    { key: 'marcadores', title: 'Marcadores' },
   ]);
 
 

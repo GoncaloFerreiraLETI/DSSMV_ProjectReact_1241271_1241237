@@ -1,9 +1,7 @@
 import AppDispatcher from '../dispatcher/AppDispatcher';
 
 const LEAGUES = [
-    'uefa.champions', 'uefa.europa', 'uefa.europa.conf', 'uefa.nations',
-    'fifa.world', 'eng.1', 'eng.2', 'esp.1', 'ger.1', 'ita.1',
-    'fra.1', 'por.1', 'por.taca.portugal', 'bra.1'
+    'uefa.champions', 'uefa.europa', 'uefa.europa.conf', 'eng.1', 'eng.2', 'esp.1', 'ger.1', 'ita.1', 'fra.1', 'por.1', 'bra.1'
 ];
 
 const LigaActions = {

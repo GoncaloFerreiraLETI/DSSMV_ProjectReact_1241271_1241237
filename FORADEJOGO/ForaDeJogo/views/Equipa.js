@@ -9,6 +9,7 @@ import AppBar from '../components/AppBar';
 import AuthStore from '../stores/AuthStore';
 import { addFavorite, removeFavorite, getFavoriteTeams } from '../actions/FavoritosActions';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import ResultadosJogosTab from '../components/ResultadosJogosTab';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -65,7 +66,7 @@ export default function Equipa({ route }) {
       <Tab.Navigator style={styles.tabContainer}>
         <Tab.Screen name="Plantel" children={() => loading ? <ActivityIndicator style={{ marginTop: 40 }} /> : <PlantelTab squad={team} />} />
         <Tab.Screen name="Jogos" children={() => <ProxJogosTab teamId={teamId} />} />
-        <Tab.Screen name="Resultados" children={() => <Text>Resultados</Text>} />
+        <Tab.Screen name="Resultados" children={() => <ResultadosJogosTab teamId={teamId} />} />
       </Tab.Navigator>
     </View>
   );
