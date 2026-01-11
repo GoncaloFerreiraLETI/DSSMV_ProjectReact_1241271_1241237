@@ -99,20 +99,31 @@ export default function EditorPlantel({ route, navigation }) {
 
 
   async function fetchPlayersFromApi(clubId) {
-    const res = await fetch(
-      `https://sports.core.api.espn.com/v2/sports/soccer/leagues/all/seasons/2025/teams/${clubId}/athletes`
-    );
+    try {
+      const res = await fetch(
+        `https://sports.core.api.espn.com/v2/sports/soccer/leagues/all/seasons/2025/teams/${clubId}/athletes`
+      );
 
-    const data = await res.json();
+      const data = await res.json();
 
-    const players = await Promise.all(
-      data.items.map(i =>
-        fetch(i.$ref.replace('http://', 'https://')).then(r => r.json())
-      )
-    );
+      if (!data?.items || !Array.isArray(data.items)) {
+        console.warn('Sem jogadores para o clube:', clubId);
+        return [];
+      }
 
-    return players;
+      const players = await Promise.all(
+        data.items.map(i =>
+          fetch(i.$ref.replace('http://', 'https://')).then(r => r.json())
+        )
+      );
+
+      return players.filter(Boolean);
+    } catch (err) {
+      console.error('Erro ao carregar jogadores:', err);
+      return [];
+    }
   }
+
 
   function assignPlayer(player) {
     setPositions(prev => {

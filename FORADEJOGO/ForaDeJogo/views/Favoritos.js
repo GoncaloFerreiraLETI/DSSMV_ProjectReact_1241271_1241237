@@ -9,7 +9,6 @@ export default function Favoritos({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
 
-  // 🔹 Atualiza userId quando AuthStore muda
   useEffect(() => {
     const onChange = () => setUserId(AuthStore.getUser()?.id ?? null);
     AuthStore.addChangeListener(onChange);
@@ -17,7 +16,6 @@ export default function Favoritos({ navigation }) {
     return () => AuthStore.removeChangeListener(onChange);
   }, []);
 
-  // 🔹 Carrega favoritos
   const loadFavorites = useCallback(async () => {
     if (!userId) {
       setTeams([]);
