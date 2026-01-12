@@ -9,10 +9,11 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
-import { supabase } from '../services/supabase';
+
 import AppBar from '../components/AppBar';
 import AuthStore from '../stores/AuthStore';
-
+import SquadStore from '../stores/SquadStore';
+import { loadSquads, createSquad } from '../actions/SquadActions';
 
 const LEAGUES = [
   { code: 'eng.1', name: 'Premier League' },
@@ -34,6 +35,7 @@ export default function CriadorPlantel({ navigation }) {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [step, setStep] = useState(1);
+
   const [selectedLeague, setSelectedLeague] = useState(null);
   const [teams, setTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
@@ -42,107 +44,57 @@ export default function CriadorPlantel({ navigation }) {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    const onChange = () => setUserId(AuthStore.getUser()?.id ?? null);
-    AuthStore.addChangeListener(onChange);
-    onChange();
-    return () => AuthStore.removeChangeListener(onChange);
+    const onAuthChange = () => {
+      const id = AuthStore.getUser()?.id ?? null;
+      setUserId(id);
+    };
+
+    AuthStore.addChangeListener(onAuthChange);
+    onAuthChange();
+
+    return () => AuthStore.removeChangeListener(onAuthChange);
   }, []);
 
   useEffect(() => {
-    if (!userId) {
+    if (userId) {
+      loadSquads(userId);
+    } else {
       setSquads([]);
       setLoading(false);
-      return;
     }
-    async function fetchSquads() {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('squads')
-        .select('*')
-        .eq('userId', userId);
-
-      if (error) {
-        console.error('Erro ao buscar plantéis:', error);
-        setSquads([]);
-      } else {
-        setSquads(data);
-      }
-      setLoading(false);
-    }
-    fetchSquads();
   }, [userId]);
 
-  async function fetchSquads() {
-    if (!userId) return;
+  useEffect(() => {
+    const onChange = () => {
+      setSquads(SquadStore.getSquads());
+      setLoading(SquadStore.isLoading());
+    };
 
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('squads')
-      .select('*')
-      .eq('userId', userId);
+    SquadStore.addChangeListener(onChange);
+    onChange();
 
-    if (error) {
-      console.error('Erro ao buscar plantéis:', error);
-      setSquads([]);
-    } else {
-      setSquads(data);
-    }
-    setLoading(false);
-  }
-
-  const renderSquadItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.item}
-      onPress={() =>
-        navigation.navigate('EditorPlantel', {
-          squadId: item.id,
-          clubId: item.teamId,
-          formation: item.formation,
-          userId: item.userId,
-        })
-      }
-    >
-      <Text style={styles.formation}>{item.formation}</Text>
-      <Text style={styles.name}>{item.name}</Text>
-    </TouchableOpacity>
-  );
-
-  const renderCreateButton = () => (
-    <TouchableOpacity
-      style={styles.createButton}
-      onPress={() => {
-        // reset do popup
-        setStep(1);
-        setSelectedLeague(null);
-        setTeams([]);
-        setSelectedTeam(null);
-        setSelectedFormation(null);
-        setSquadName('');
-        setModalVisible(true);
-      }}
-    >
-      <Text style={styles.createButtonText}>Criar Novo Plantel</Text>
-    </TouchableOpacity>
-  );
+    return () => SquadStore.removeChangeListener(onChange);
+  }, []);
 
   async function fetchTeamsFromLeague(leagueCode) {
     try {
       const res = await fetch(
-        `https://sports.core.api.espn.com/v2/sports/soccer/leagues/${leagueCode}/seasons/2025/teams?lang=en&region=us`
+        `https://sports.core.api.espn.com/v2/sports/soccer/leagues/${leagueCode}/seasons/2025/teams`
       );
       const data = await res.json();
 
       const teamsData = await Promise.all(
-        data.items.map(async (i) => {
-          const teamRes = await fetch(i.$ref.replace('http://', 'https://'));
-          const teamJson = await teamRes.json();
-          return { id: teamJson.id, name: teamJson.name };
+        data.items.map(async i => {
+          const team = await fetch(i.$ref.replace('http://', 'https://')).then(r =>
+            r.json()
+          );
+          return { id: team.id, name: team.name };
         })
       );
 
       setTeams(teamsData);
-    } catch (err) {
-      console.error('Erro ao buscar clubes da liga:', err);
+    } catch (e) {
+      console.error('Erro ao buscar clubes:', e);
     }
   }
 
@@ -154,36 +106,28 @@ export default function CriadorPlantel({ navigation }) {
       setStep(3);
     } else if (step === 3 && selectedFormation) {
       setStep(4);
-    } else if (step === 4 && squadName.trim() !== '') {
+    } else if (step === 4 && squadName.trim()) {
       setCreating(true);
-      const { data, error } = await supabase.from('squads').insert({
-        userId: userId,
+
+      const squad = await createSquad({
+        userId,
         teamId: selectedTeam.id,
         formation: selectedFormation,
         name: squadName,
-      }).select().single();
-
-      setCreating(false);
-
-      if (error) {
-        console.error('Erro ao criar plantel:', error);
-        return;
-      }
-
-      setModalVisible(false);
-      navigation.navigate('EditorPlantel', {
-        squadId: data.id,
-        clubId: selectedTeam.id,
-        formation: selectedFormation,
-        userId: userId,
       });
 
-      fetchSquads();
-    }
-  }
+      setCreating(false);
+      setModalVisible(false);
 
-  function handleCancelModal() {
-    setModalVisible(false);
+      if (squad) {
+        navigation.navigate('EditorPlantel', {
+          squadId: squad.id,
+          clubId: selectedTeam.id,
+          formation: selectedFormation,
+          userId,
+        });
+      }
+    }
   }
 
   function renderStepContent() {
@@ -191,12 +135,12 @@ export default function CriadorPlantel({ navigation }) {
       return (
         <FlatList
           data={LEAGUES}
-          keyExtractor={(item) => item.code}
+          keyExtractor={i => i.code}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={[
                 styles.item,
-                selectedLeague?.code === item.code && { borderColor: '#007bff', borderWidth: 2 },
+                selectedLeague?.code === item.code && styles.selected,
               ]}
               onPress={() => setSelectedLeague(item)}
             >
@@ -205,16 +149,18 @@ export default function CriadorPlantel({ navigation }) {
           )}
         />
       );
-    } else if (step === 2) {
+    }
+
+    if (step === 2) {
       return (
         <FlatList
           data={teams}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={i => String(i.id)}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={[
                 styles.item,
-                selectedTeam?.id === item.id && { borderColor: '#007bff', borderWidth: 2 },
+                selectedTeam?.id === item.id && styles.selected,
               ]}
               onPress={() => setSelectedTeam(item)}
             >
@@ -223,16 +169,18 @@ export default function CriadorPlantel({ navigation }) {
           )}
         />
       );
-    } else if (step === 3) {
+    }
+
+    if (step === 3) {
       return (
         <FlatList
           data={FORMATIONS}
-          keyExtractor={(item) => item}
+          keyExtractor={i => i}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={[
                 styles.item,
-                selectedFormation === item && { borderColor: '#007bff', borderWidth: 2 },
+                selectedFormation === item && styles.selected,
               ]}
               onPress={() => setSelectedFormation(item)}
             >
@@ -241,7 +189,9 @@ export default function CriadorPlantel({ navigation }) {
           )}
         />
       );
-    } else if (step === 4) {
+    }
+
+    if (step === 4) {
       return (
         <TextInput
           style={styles.input}
@@ -251,6 +201,8 @@ export default function CriadorPlantel({ navigation }) {
         />
       );
     }
+
+    return null;
   }
 
   return (
@@ -258,20 +210,53 @@ export default function CriadorPlantel({ navigation }) {
       <AppBar title="Os Meus Plantéis" />
 
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" />
       ) : (
         <FlatList
           data={squads}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderSquadItem}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          ListFooterComponent={renderCreateButton}
+          keyExtractor={i => String(i.id)}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.item}
+              onPress={() =>
+                navigation.navigate('EditorPlantel', {
+                  squadId: item.id,
+                  clubId: item.teamId,
+                  formation: item.formation,
+                  userId: item.userId,
+                })
+              }
+            >
+              <Text style={styles.formation}>{item.formation}</Text>
+              <Text style={styles.name}>{item.name}</Text>
+            </TouchableOpacity>
+          )}
+          ListFooterComponent={
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={() => {
+                setStep(1);
+                setSelectedLeague(null);
+                setTeams([]);
+                setSelectedTeam(null);
+                setSelectedFormation(null);
+                setSquadName('');
+                setModalVisible(true);
+              }}
+            >
+              <Text style={styles.createButtonText}>
+                Criar Novo Plantel
+              </Text>
+            </TouchableOpacity>
+          }
         />
       )}
 
       <Modal visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Criar Plantel - Passo {step}/4</Text>
+          <Text style={styles.modalTitle}>
+            Criar Plantel – Passo {step}/4
+          </Text>
 
           {renderStepContent()}
 
@@ -285,8 +270,10 @@ export default function CriadorPlantel({ navigation }) {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={{ marginTop: 10 }} onPress={handleCancelModal}>
-            <Text style={{ textAlign: 'center', color: '#222' }}>Cancelar</Text>
+          <TouchableOpacity onPress={() => setModalVisible(false)}>
+            <Text style={{ textAlign: 'center', marginTop: 10 }}>
+              Cancelar
+            </Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -296,14 +283,22 @@ export default function CriadorPlantel({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#f2f2f2' },
+
   item: {
     backgroundColor: '#fff',
     padding: 12,
     marginBottom: 6,
     borderRadius: 6,
   },
-  formation: { fontWeight: 'bold', fontSize: 16, color: '#333' },
-  name: { fontSize: 16, color: '#333' },
+
+  selected: {
+    borderWidth: 2,
+    borderColor: '#007bff',
+  },
+
+  formation: { fontWeight: 'bold', fontSize: 16 },
+  name: { fontSize: 16 },
+
   createButton: {
     backgroundColor: '#007bff',
     padding: 16,
@@ -311,10 +306,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
   },
-  createButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+
+  createButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 
   modalContainer: { flex: 1, padding: 16, backgroundColor: '#f9f9f9' },
   modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
+
   nextButton: {
     backgroundColor: '#28a745',
     padding: 14,
@@ -322,7 +323,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 12,
   },
-  nextButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+
+  nextButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+
   input: {
     borderWidth: 1,
     borderColor: '#999',
